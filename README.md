@@ -78,6 +78,7 @@ CREATE TABLE employees (
         REFERENCES departments(id)
         ON DELETE SET NULL
 );
+```
 
 ## Шаг 3: Техническая реализация приложения
 

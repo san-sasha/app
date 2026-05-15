@@ -43,7 +43,7 @@
 В базе данных реализованы внешние ключи для обеспечения целостности данных и индексы для быстрого поиска.
 
 ### Визуальная схема (ER-диаграмма)
-<img width="959" height="633" alt="ER-диаграмма" src="https://github.com/user-attachments/assets/your-image-here" />
+<img width="713" height="506" alt="Image" src="https://github.com/user-attachments/assets/e5392bfa-3ecd-4f45-91cf-37d41086f32f" />
 
 ### SQL Структура
 ```sql

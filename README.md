@@ -1,59 +1,133 @@
-# App
+Лабораторная работа: Модуль справочной информации бизнес-приложения
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.11.
+Выполнил: Драчан Александр Владимирович
+Студент: 3 курс, 2 группа
+Хостинг: https://san-sasha.github.io/app/
 
-## Development server
+Шаг 1: Описание справочников
+В рамках работы разработаны два взаимосвязанных справочника для информационной системы управления персоналом.
 
-To start a local development server, run:
+1. Справочник «Отделы» (Departments)
+Содержит информацию о структурных подразделениях компании.
 
-```bash
-ng serve
-```
+id (uuid): Уникальный идентификатор записи.
+название (text): Наименование отдела.
+описание (text): Многострочное поле для подробной информации об отделе.
+дата_создания (date): Дата основания отдела.
+этаж (numeric, целое число): Номер этажа, на котором располагается отдел.
+премиальный_коэффициент (numeric, тип с фиксированной запятой): Коэффициент для расчёта премии сотрудников отдела.
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+2. Справочник «Сотрудники» (Employees)
+Хранит личные и профессиональные данные работников.
 
-## Code scaffolding
+id (uuid): Уникальный идентификатор записи.
+фамилия (text): Фамилия сотрудника.
+имя (text): Имя сотрудника.
+отчество (text): Отчество сотрудника.
+должность (text): Занимаемая должность.
+дата_приёма (date): Дата трудоустройства.
+табельный_номер (numeric, целое число): Уникальный табельный номер сотрудника.
+оклад (numeric, тип с фиксированной запятой): Фиксированная заработная плата.
+department_id (uuid): Внешний ключ, ссылающийся на id отдела.
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+Шаг 2: Схема базы данных
+СУБД: Supabase (PostgreSQL).
+В базе данных реализованы внешние ключи для обеспечения целостности данных и индексы для быстрого поиска.
 
-```bash
-ng generate component component-name
-```
+Визуальная схема (ER-диаграмма)
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
 
-```bash
-ng generate --help
-```
+SQL‑структура
+-- Таблица "Отделы" (Departments)
+CREATE TABLE departments (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    created_at DATE DEFAULT CURRENT_DATE,
+    floor INTEGER,
+    bonus_coefficient DECIMAL(10, 2),
+    is_deleted BOOLEAN DEFAULT FALSE,
+    last_modified_id INTEGER
+);
 
-## Building
+-- Таблица "Сотрудники" (Employees)
+CREATE TABLE employees (
+    id SERIAL PRIMARY KEY,
+    last_name VARCHAR(100) NOT NULL,
+    first_name VARCHAR(100) NOT NULL,
+    middle_name VARCHAR(100),
+    position VARCHAR(255),
+    hire_date DATE,
+    staff_number INTEGER UNIQUE,
+    salary DECIMAL(15, 2),
+    department_id INTEGER,
+    is_deleted BOOLEAN DEFAULT FALSE,
+    last_modified_id INTEGER,
+    
+    CONSTRAINT fk_department
+        FOREIGN KEY(department_id)
+        REFERENCES departments(id)
+        ON DELETE SET NULL
+);
+Пояснение:
+Поля is_deleted и last_modified_id реализуют «мягкое удаление» и механизм версионирования записей (совместимость с DataService).
+Внешний ключ department_id связывает сотрудника с отделом. При удалении отдела значение department_id у сотрудников станет NULL (ON DELETE SET NULL), что предотвращает потерю данных о сотрудниках.
 
-To build the project run:
+Шаг 3: Техническая реализация приложения
+Приложение разработано как Web‑ориентированный толстый клиент (Fat Client). Вся основная логика обработки данных, фильтрации, сортировки и валидации сосредоточена в коде браузерного приложения (Angular), в то время как база данных (Supabase/PostgreSQL) используется как надёжное хранилище с доступом через API.
 
-```bash
-ng build
-```
+🛠 Технологический стек
+Frontend: Angular 19 (Standalone Components, Signals)
+Стили: SCSS с использованием CSS‑переменных и Flexbox/Grid
+База данных: Supabase (PostgreSQL) с поддержкой SERIAL, NUMERIC и DATE
+Язык: TypeScript
+API‑слой: @supabase/supabase-js
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+📂 Файловая структура модуля
+text
+src/
+├── app/
+│   ├── app.component.ts          # Главный контроллер: управление вкладками, сортировка, модальные окна
+│   ├── app.component.html        # Разметка интерфейса
+│   ├── app.component.scss        # Стили приложения
+│   ├── services/
+│   │   └── data.service.ts       # Слой связи с Supabase API (CRUD операции)
+│   ├── security/
+│   │   └── validation.ts         # Логика валидации и санитайзинга полей
+│   └── models/
+│       ├── department.model.ts   # Интерфейс данных отдела
+│       └── employee.model.ts     # Интерфейс данных сотрудника
+🚀 Инструкция по запуску проекта
+Для запуска приложения вам понадобятся Node.js (версия 18+) и Angular CLI.
 
-## Running unit tests
+Подготовка окружения
+Если Angular CLI ещё не установлен, выполните в терминале:
 
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+npm install -g @angular/cli
 
-```bash
-ng test
-```
+Клонирование и установка зависимостей
+Склонируйте репозиторий и перейдите в папку проекта:
 
-## Running end-to-end tests
+git clone <ссылка_на_ваш_репозиторий>
+cd hr-department-app
 
-For end-to-end (e2e) testing, run:
+Настройка базы данных (Supabase)
+Создайте проект на supabase.com.
+В разделе SQL Editor выполните SQL‑скрипт из Шага 2 (он создаст таблицы departments и employees).
+В настройках проекта (Settings → API) скопируйте Project URL и anon public key.
 
-```bash
-ng e2e
-```
+Конфигурация приложения
+Откройте файл src/app/services/data.service.ts и вставьте ваши ключи в конструктор:
+this.supabase = createClient(
+  'ВАШ_PROJECT_URL',
+  'ВАШ_ANON_KEY'
+);
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+Запуск
+Запустите локальный сервер разработки:
+ng serve -o
+После компиляции приложение автоматически откроется в браузере по адресу http://localhost:4200/.
 
-## Additional Resources
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+
+Связь: Поле department_id в справочнике «Сотрудники» ссылается на поле id в справочнике «Отделы». Это организует связь «один ко многим»: один отдел может содержать множество сотрудников. Хранение организовано через UUID (универсальные уникальные идентификаторы), что исключает ошибки при совпадении названий отделов или имён сотрудников.
